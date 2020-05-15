@@ -1,19 +1,28 @@
 package io.github.websters_dog.weather_forecast_2
 
+import android.Manifest
 import android.content.Intent
+import android.content.pm.PackageManager
 import android.os.Bundle
-import androidx.appcompat.app.AppCompatActivity
-import androidx.recyclerview.widget.RecyclerView
-import com.google.android.material.snackbar.Snackbar
+import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import android.widget.TextView
-
+import android.widget.Toast
+import androidx.appcompat.app.AlertDialog
+import androidx.appcompat.app.AppCompatActivity
+import androidx.core.app.ActivityCompat
+import androidx.recyclerview.widget.RecyclerView
+import com.google.android.material.snackbar.Snackbar
 import io.github.websters_dog.weather_forecast_2.dummy.DummyContent
+import io.github.websters_dog.weather_forecast_2.location.LocationDisabledException
+import io.github.websters_dog.weather_forecast_2.location.LocationPermissionException
+import io.github.websters_dog.weather_forecast_2.location.LocationRepository
+import io.reactivex.rxjava3.disposables.CompositeDisposable
 import kotlinx.android.synthetic.main.activity_item_list.*
-import kotlinx.android.synthetic.main.item_list_content.view.*
 import kotlinx.android.synthetic.main.item_list.*
+import kotlinx.android.synthetic.main.item_list_content.view.*
 
 /**
  * An activity representing a list of Pings. This activity
@@ -23,6 +32,9 @@ import kotlinx.android.synthetic.main.item_list.*
  * item details. On tablets, the activity presents the list of items and
  * item details side-by-side using two vertical panes.
  */
+
+private const val LOCATION_PERMISSION_REQUEST = 9001
+
 class ItemListActivity : AppCompatActivity() {
 
     /**
@@ -30,6 +42,8 @@ class ItemListActivity : AppCompatActivity() {
      * device.
      */
     private var twoPane: Boolean = false
+
+    private val compositeDisposable = CompositeDisposable()
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -52,8 +66,83 @@ class ItemListActivity : AppCompatActivity() {
         }
 
         setupRecyclerView(item_list)
+
+        retrieveLocation()
     }
 
+    override fun onDestroy() {
+        compositeDisposable.clear()
+        super.onDestroy()
+    }
+
+    //todo move
+    private fun retrieveLocation() {
+        val lr = LocationRepository.getInstance(this)
+        lr.invalidateCache()
+        val disposable = lr.getLocation()
+            .subscribe { coords, throwable ->
+                when (throwable) {
+                    null -> {
+                        Log.e("[location]", "detected location : $coords")
+                        Toast.makeText(this, coords.toString(), Toast.LENGTH_LONG).show()
+                    }
+                    is LocationPermissionException -> {
+                        Log.e("[location]", throwable.toString())
+                        Toast.makeText(this, throwable.toString(), Toast.LENGTH_LONG).show()
+
+                        checkLocationPermission()
+                    }
+                    is LocationDisabledException -> {
+                        Log.e("[location]", throwable.toString())
+                        Toast.makeText(this, throwable.toString(), Toast.LENGTH_LONG).show()
+                    }
+                }
+            }
+        compositeDisposable.add(disposable)
+    }
+
+    private fun checkLocationPermission(): Boolean {
+        // Should we show an explanation?
+        if (ActivityCompat.shouldShowRequestPermissionRationale(this, Manifest.permission.ACCESS_COARSE_LOCATION)) {
+            AlertDialog.Builder(this)
+                .setTitle(R.string.location_permission_explanation_title)
+                .setMessage(R.string.location_permission_explanation_message)
+                .setPositiveButton(android.R.string.ok) { _, _ ->
+                    makeLocationPermissionRequest()
+                }
+                .create()
+                .show()
+        } else {
+            makeLocationPermissionRequest()
+        }
+        return false
+    }
+
+    private fun makeLocationPermissionRequest() {
+        ActivityCompat.requestPermissions(
+            this, arrayOf(Manifest.permission.ACCESS_COARSE_LOCATION),
+            LOCATION_PERMISSION_REQUEST)
+    }
+
+    override fun onRequestPermissionsResult(
+        requestCode: Int,
+        permissions: Array<out String>,
+        grantResults: IntArray
+    ) {
+        super.onRequestPermissionsResult(requestCode, permissions, grantResults)
+        when (requestCode) {
+            LOCATION_PERMISSION_REQUEST -> {
+                if (grantResults.isNotEmpty()
+                    && grantResults[0] == PackageManager.PERMISSION_GRANTED
+                ) {
+                    retrieveLocation()
+                } else {
+                    //todo show warning or something else
+                }
+                return
+            }
+        }
+    }
     private fun setupRecyclerView(recyclerView: RecyclerView) {
         recyclerView.adapter = SimpleItemRecyclerViewAdapter(this, DummyContent.ITEMS, twoPane)
     }

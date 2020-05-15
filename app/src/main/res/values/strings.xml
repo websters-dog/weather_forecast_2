@@ -1,4 +1,9 @@
 <resources>
+
     <string name="app_name">Weather Forecast 2</string>
     <string name="title_item_detail">Item Detail</string>
+
+    <string name="location_permission_explanation_title">Permissions</string>
+    <string name="location_permission_explanation_message">Location permission is required to show weather for you</string>
+
 </resources>
