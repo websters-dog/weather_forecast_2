@@ -6,8 +6,8 @@ import android.content.pm.PackageManager
 import android.util.Log
 import androidx.core.app.ActivityCompat
 import com.google.android.gms.location.*
-import io.reactivex.rxjava3.core.Single
-import io.reactivex.rxjava3.core.SingleEmitter
+import io.reactivex.Single
+import io.reactivex.SingleEmitter
 
 
 private fun runWithLocationPermissionCheck(

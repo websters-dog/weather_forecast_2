@@ -4,7 +4,7 @@ import android.content.Context
 import android.content.SharedPreferences
 import android.util.Log
 import androidx.preference.PreferenceManager
-import io.reactivex.rxjava3.core.Single
+import io.reactivex.Single
 
 
 private const val LAT_PREF_KEY = "PrefsLocationSource.LAT_KEY"

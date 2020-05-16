@@ -19,8 +19,8 @@ import io.github.websters_dog.weather_forecast_2.dummy.DummyContent
 import io.github.websters_dog.weather_forecast_2.location.LocationIsNotAvailableException
 import io.github.websters_dog.weather_forecast_2.location.LocationPermissionException
 import io.github.websters_dog.weather_forecast_2.location.LocationRepository
-import io.reactivex.rxjava3.disposables.CompositeDisposable
-import io.reactivex.rxjava3.kotlin.addTo
+import io.reactivex.disposables.CompositeDisposable
+import io.reactivex.rxkotlin.addTo
 import kotlinx.android.synthetic.main.activity_item_list.*
 import kotlinx.android.synthetic.main.item_list.*
 import kotlinx.android.synthetic.main.item_list_content.view.*
