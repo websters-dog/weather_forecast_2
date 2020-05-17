@@ -19,8 +19,14 @@ import io.github.websters_dog.weather_forecast_2.dummy.DummyContent
 import io.github.websters_dog.weather_forecast_2.location.LocationIsNotAvailableException
 import io.github.websters_dog.weather_forecast_2.location.LocationPermissionException
 import io.github.websters_dog.weather_forecast_2.location.LocationRepository
+import io.github.websters_dog.weather_forecast_2.weather.Forecast
+import io.github.websters_dog.weather_forecast_2.weather.OpenWeatherMapApiService
+import io.github.websters_dog.weather_forecast_2.weather.WeatherRepository
+import io.reactivex.android.schedulers.AndroidSchedulers
+
 import io.reactivex.disposables.CompositeDisposable
 import io.reactivex.rxkotlin.addTo
+import io.reactivex.schedulers.Schedulers
 import kotlinx.android.synthetic.main.activity_item_list.*
 import kotlinx.android.synthetic.main.item_list.*
 import kotlinx.android.synthetic.main.item_list_content.view.*
@@ -69,6 +75,19 @@ class ItemListActivity : AppCompatActivity() {
         setupRecyclerView(item_list)
 
         retrieveLocation()
+
+        WeatherRepository.getInstance().getForecast()
+            .subscribe{
+                Log.d("[weather]", "${javaClass.simpleName}.onCreate : getForecast : $it")
+            }
+            .addTo(compositeDisposable)
+
+        WeatherRepository.getInstance().getCurrentWeather()
+            .subscribe{
+                Log.d("[weather]", "${javaClass.simpleName}.onCreate : getForecast : $it")
+            }
+            .addTo(compositeDisposable)
+
     }
 
     override fun onDestroy() {
@@ -80,7 +99,7 @@ class ItemListActivity : AppCompatActivity() {
     private fun retrieveLocation() {
         val lr = LocationRepository.getInstance(this)
         lr.invalidateCache()
-        lr.getLocation()
+        val disposable = lr.getLocation()
             .subscribe { coords, throwable ->
                 when (throwable) {
                     null -> {
@@ -99,7 +118,7 @@ class ItemListActivity : AppCompatActivity() {
                     }
                 }
             }
-            .addTo(compositeDisposable)
+        compositeDisposable.add(disposable)
     }
 
     private fun checkLocationPermission(): Boolean {
