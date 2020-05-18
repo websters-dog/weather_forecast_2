@@ -16,8 +16,8 @@ open class Forecast(
 
 open class CurrentWeather(
     var dt: Long = 0,
-    var mainBlock: MainWeatherInfoBlock? = null,
-    var weatherItem: RealmList<WeatherItem>? = null,
+    var main: MainWeatherInfoBlock? = null,
+    var weather: RealmList<WeatherItem>? = null,
     var wind: Wind? = null,
     var sys: Sys? = null,
     var precipitation: Precipitation? = null,
@@ -27,8 +27,8 @@ open class CurrentWeather(
     override fun toString(): String {
         return "CurrentWeather: " +
                 "dt=$dt, " +
-                "main=$mainBlock, " +
-                "weather=${weatherItem?.joinToString()}" +
+                "main=$main, " +
+                "weather=${weather?.joinToString()}" +
                 "super=${super.toString()}, " +
                 "wind=$wind, " +
                 "sys=${sys}, " +
@@ -41,21 +41,26 @@ open class CurrentWeather(
 
 open class ForecastItem(
     var dt: Long = 0,
-    var mainBlock: MainWeatherInfoBlock? = null,
-    var weatherItem: RealmList<WeatherItem>? = null
+    var main: MainWeatherInfoBlock? = null,
+    var weather: RealmList<WeatherItem>? = null
 ) : RealmObject() {
     override fun toString(): String {
-        return "WeatherInfo: dt=$dt, main=$mainBlock, weather=${weatherItem?.joinToString()}"
+        return "WeatherInfo: dt=$dt, main=$main, weather=${weather?.joinToString()}"
+    }
+
+    fun getMillisDt(): Long {
+        return dt * 1000
     }
 }
 
 
 open class MainWeatherInfoBlock(
     var temp: Float = 0f,
-    var pressure: Float = 0f
+    var pressure: Float = 0f,
+    var humidity: Float = 0f
 ) : RealmObject() {
     override fun toString(): String {
-        return "MainWeatherInfoBlock: temp=$temp, pressure=$pressure"
+        return "MainWeatherInfoBlock: temp=$temp, pressure=$pressure, humidity=$humidity"
     }
 }
 

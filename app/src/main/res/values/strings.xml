@@ -1,9 +1,39 @@
 <resources>
 
     <string name="app_name">Weather Forecast 2</string>
-    <string name="title_item_detail">Item Detail</string>
 
     <string name="location_permission_explanation_title">Permissions</string>
     <string name="location_permission_explanation_message">Location permission is required to show weather for you</string>
+
+    <string name="tab_name_now">Today</string>
+    <string name="tab_name_forecast">Forecast</string>
+
+    <string name="current_weather_place">%s, %s</string>
+    <string name="current_weather_temp_weather">%d°C | %s"</string>
+    <string name="current_weather_precipitation_mm">%.01f mm</string>
+    <string name="current_weather_humidity_percents">%d%%</string>
+    <string name="current_weather_pressure_hpa">%d hPa</string>
+    <string name="current_weather_wind_speed_meter_per_second">%.01f m/s</string>
+    <string name="current_weather_wind_direction_n">N</string>
+    <string name="current_weather_wind_direction_nne">NNE</string>
+    <string name="current_weather_wind_direction_ne">NE</string>
+    <string name="current_weather_wind_direction_ene">ENE</string>
+    <string name="current_weather_wind_direction_e">E</string>
+    <string name="current_weather_wind_direction_ese">ESE</string>
+    <string name="current_weather_wind_direction_se">SE</string>
+    <string name="current_weather_wind_direction_sse">SSE</string>
+    <string name="current_weather_wind_direction_s">S</string>
+    <string name="current_weather_wind_direction_ssw">SSW</string>
+    <string name="current_weather_wind_direction_sw">SW</string>
+    <string name="current_weather_wind_direction_wsw">WSW</string>
+    <string name="current_weather_wind_direction_w">W</string>
+    <string name="current_weather_wind_direction_wnw">WNW</string>
+    <string name="current_weather_wind_direction_nw">NW</string>
+    <string name="current_weather_wind_direction_nnw">NNW</string>
+    <string name="current_weather_share">Share</string>
+    <string name="current_weather_share_message">My weather now: %s</string>
+
+    <string name="forecast_list_today">Today</string>
+    <string name="forecast_list_degree_format">%d°</string>
 
 </resources>
