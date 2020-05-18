@@ -8,11 +8,19 @@
     android:orientation="vertical"
     android:gravity="fill">
 
-    <androidx.core.widget.ContentLoadingProgressBar
+    <RelativeLayout
         android:id="@+id/progress"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
-        android:visibility="gone"/>
+        android:gravity="center">
+
+        <androidx.core.widget.ContentLoadingProgressBar
+            style="@android:style/Widget.Holo.ProgressBar.Large"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:visibility="visible"/>
+
+    </RelativeLayout>
 
     <RelativeLayout
         android:id="@+id/root"

@@ -1,11 +1,12 @@
 package io.github.websters_dog.weather_forecast_2.weather
 
+import io.github.websters_dog.weather_forecast_2.location.Coords
 import io.reactivex.Observable
 
 
 interface WeatherSource {
-    fun getForecast(): Observable<Forecast>
-    fun getCurrentWeather(): Observable<CurrentWeather>
+    fun getForecast(coords: Coords): Observable<Forecast>
+    fun getCurrentWeather(coords: Coords): Observable<CurrentWeather>
 }
 
 

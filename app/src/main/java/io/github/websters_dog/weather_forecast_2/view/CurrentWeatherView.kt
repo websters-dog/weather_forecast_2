@@ -1,12 +1,14 @@
 package io.github.websters_dog.weather_forecast_2.view
 
+import android.Manifest
 import android.content.Intent
 import android.net.Uri
 import android.os.Bundle
 import android.util.Log
-import android.view.LayoutInflater
 import android.view.View
-import android.view.ViewGroup
+import android.widget.Toast
+import androidx.appcompat.app.AlertDialog
+import androidx.core.app.ActivityCompat
 import androidx.fragment.app.Fragment
 import com.squareup.picasso.Picasso
 import io.github.websters_dog.weather_forecast_2.R
@@ -16,23 +18,43 @@ import kotlin.math.roundToInt
 
 
 interface CurrentWeatherView {
-    var callback: Callback
+
+    var presenter: Presenter
     fun setCurrentWeather(weather: CurrentWeather)
     fun setInProgress(inProgress: Boolean)
+    fun requestLocationPermission()
+    fun showShareActivity(textRes: Int, vararg formatArgs: Any)
+    fun showMessage(textRes: Int)
 
-    interface Callback {
+    interface Presenter {
+        fun stopWork()
+        fun starWork()
         fun onShareClicked()
+        fun onPermissionRequestResult(grantResults: IntArray)
     }
 }
 
 
+private const val LOCATION_PERMISSION_REQUEST = 9001
+
+
 class CurrentWeatherFragment : Fragment(R.layout.fragment_current_weather), CurrentWeatherView {
 
-    override lateinit var callback: CurrentWeatherView.Callback
+    override lateinit var presenter: CurrentWeatherView.Presenter
     private lateinit var weather: CurrentWeather
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
-        share_text.setOnClickListener(::onShareClicked)
+        share_text.setOnClickListener { presenter.onShareClicked() }
+    }
+
+    override fun onResume() {
+        super.onResume()
+        presenter.starWork()
+    }
+
+    override fun onPause() {
+        super.onPause()
+        presenter.stopWork()
     }
 
     override fun setCurrentWeather(weather: CurrentWeather) {
@@ -83,19 +105,60 @@ class CurrentWeatherFragment : Fragment(R.layout.fragment_current_weather), Curr
         progress.visibility = if (inProgress) View.VISIBLE else View.GONE
     }
 
-    //todo move to callback
-    private fun onShareClicked(v: View) {
-        val sendIntent = Intent().apply {
+    override fun requestLocationPermission() {
+        activity?.let {
+            val needExplanation = ActivityCompat
+                .shouldShowRequestPermissionRationale(it, Manifest.permission.ACCESS_COARSE_LOCATION)
+
+            if (needExplanation) {
+                AlertDialog.Builder(it)
+                    .setTitle(R.string.location_permission_explanation_title)
+                    .setMessage(R.string.location_permission_explanation_message)
+                    .setNeutralButton(android.R.string.ok) { _, _ -> /* do nothing */ }
+                    .setOnDismissListener() { _ -> makeLocationPermissionRequest() }
+                    .create()
+                    .show()
+            } else {
+                makeLocationPermissionRequest()
+            }
+        }
+    }
+
+    override fun showShareActivity(textRes: Int, vararg formatArgs: Any) {
+        val intent = Intent().apply {
             action = Intent.ACTION_SEND
             type = "text/plain"
-            putExtra(
-                Intent.EXTRA_TEXT,
-                getString(
-                    R.string.current_weather_share_message,
-                    "${weather.main?.temp ?: ""}°C | ${weather.weather?.first()?.main ?: ""}")
+            putExtra(Intent.EXTRA_TEXT, getString(textRes, *formatArgs))
+        }
+        startActivity(intent)
+    }
+
+    override fun showMessage(textRes: Int) {
+        //todo replace with shackbar
+        Toast.makeText(context, textRes,Toast.LENGTH_LONG).show()
+    }
+
+    private fun makeLocationPermissionRequest() {
+        activity?.let {
+            ActivityCompat.requestPermissions(
+                it,
+                arrayOf(Manifest.permission.ACCESS_COARSE_LOCATION),
+                LOCATION_PERMISSION_REQUEST
             )
         }
-        startActivity(sendIntent)
+    }
+
+    override fun onRequestPermissionsResult(
+        requestCode: Int,
+        permissions: Array<out String>,
+        grantResults: IntArray
+    ) {
+        super.onRequestPermissionsResult(requestCode, permissions, grantResults)
+        when (requestCode) {
+            LOCATION_PERMISSION_REQUEST -> {
+                presenter.onPermissionRequestResult(grantResults)
+            }
+        }
     }
 
 

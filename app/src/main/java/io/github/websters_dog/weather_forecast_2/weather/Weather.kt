@@ -1,5 +1,6 @@
 package io.github.websters_dog.weather_forecast_2.weather
 
+import io.github.websters_dog.weather_forecast_2.location.Coords
 import io.realm.RealmList
 import io.realm.RealmObject
 
@@ -7,9 +8,17 @@ import io.realm.RealmObject
 open class Forecast(
     var list: RealmList<ForecastItem>? = null,
     var city: City? = null
-) : RealmObject() {
+) : RealmObject(), DataInfo {
     override fun toString(): String {
         return "Forecast: weather=${list?.joinToString()}, city=$city"
+    }
+
+    override fun getCoords(): Coords? {
+        return city?.coord?.run { Coords(this.lat, this.lon) }
+    }
+
+    override fun getMillisDt(): Long {
+        return list?.first()?.getMillisDt() ?: 0
     }
 }
 
@@ -21,9 +30,9 @@ open class CurrentWeather(
     var wind: Wind? = null,
     var sys: Sys? = null,
     var precipitation: Precipitation? = null,
-    var coord: Coord? = null,
+    var coord: WeatherCoord? = null,
     var name: String = ""
-) : RealmObject() {
+) : RealmObject(), DataInfo {
     override fun toString(): String {
         return "CurrentWeather: " +
                 "dt=$dt, " +
@@ -35,6 +44,14 @@ open class CurrentWeather(
                 "precipitation=${precipitation}, " +
                 "coord=${coord}, " +
                 "name=${name}"
+    }
+
+    override fun getCoords(): Coords? {
+        return coord?.run { Coords(this.lat, this.lon) }
+    }
+
+    override fun getMillisDt(): Long {
+        return dt * 1000
     }
 }
 
@@ -100,7 +117,7 @@ open class Precipitation(
 open class City(
     var id: Long = 0,
     var name: String = "",
-    var coord: Coord? = null,
+    var coord: WeatherCoord? = null,
     var country: String = ""
 ) : RealmObject() {
     override fun toString(): String {
@@ -109,7 +126,7 @@ open class City(
 }
 
 
-open class Coord(
+open class WeatherCoord(
     var lat: Float = 0f,
     var lon: Float = 0f
 ) : RealmObject() {
@@ -125,4 +142,10 @@ open class Sys(
     override fun toString(): String {
         return "Sys: country=$country"
     }
+}
+
+
+interface DataInfo {
+    fun getCoords(): Coords?
+    fun getMillisDt(): Long
 }

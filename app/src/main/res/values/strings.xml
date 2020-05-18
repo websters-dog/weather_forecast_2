@@ -4,6 +4,8 @@
 
     <string name="location_permission_explanation_title">Permissions</string>
     <string name="location_permission_explanation_message">Location permission is required to show weather for you</string>
+    <string name="location_error_message">Can\'t get location. Please check your location settings and try again.</string>
+    <string name="weather_loading_error_message">Can\'t load the weather. Please check your internet settings and try again.</string>
 
     <string name="tab_name_now">Today</string>
     <string name="tab_name_forecast">Forecast</string>

@@ -1,10 +1,9 @@
 package io.github.websters_dog.weather_forecast_2.weather
 
-import android.content.Context
-import io.github.websters_dog.weather_forecast_2.location.LocationRepository
+import io.github.websters_dog.weather_forecast_2.location.Coords
 import io.reactivex.Observable
 import io.reactivex.ObservableSource
-import kotlin.reflect.KFunction1
+import kotlin.reflect.KFunction2
 
 
 class WeatherRepository private constructor(
@@ -12,33 +11,45 @@ class WeatherRepository private constructor(
     private val basicSources: List<WeatherSource>
 ) : CachingWeatherSource {
 
-    override fun getForecast(): Observable<Forecast> {
+    override fun getForecast(coords: Coords): Observable<Forecast> {
         return getData(
             if (basicSources.isNotEmpty()) basicSources[0]
-            else cashingWeatherSource, WeatherSource::getForecast
+            else cashingWeatherSource,
+            coords,
+            WeatherSource::getForecast
         )
     }
 
-    override fun getCurrentWeather(): Observable<CurrentWeather> {
+    override fun getCurrentWeather(coords: Coords): Observable<CurrentWeather> {
         return getData(
             if (basicSources.isNotEmpty()) basicSources[0]
-            else cashingWeatherSource, WeatherSource::getCurrentWeather
+            else cashingWeatherSource,
+            coords,
+            WeatherSource::getCurrentWeather
         )
     }
 
     private fun <T> getData(
         source: WeatherSource,
-        function: KFunction1<WeatherSource, Observable<T>>): Observable<T> {
+        coords: Coords,
+        function: KFunction2<WeatherSource, Coords, Observable<T>>
+    ): Observable<T> {
+
         var resumeNext: ((Throwable) -> ObservableSource<T>)? = null
-        when (basicSources.indexOf(source)) {
-            in 0..basicSources.size - 2 -> {
-                resumeNext = { getData(basicSources[basicSources.indexOf(source) + 1], function) }
+        when (source) {
+            cashingWeatherSource ->  {
+                if (basicSources.isNotEmpty())
+                    resumeNext = {
+                        getData(basicSources[basicSources.indexOf(source) + 1], coords, function)
+                    }
             }
-            basicSources.size - 1 -> {
-                resumeNext = { getData(cashingWeatherSource, function) }
+            basicSources.last() -> {
+                resumeNext = {
+                    getData(basicSources[basicSources.indexOf(source) + 1], coords, function)
+                }
             }
         }
-        return if (resumeNext != null) function.invoke(source).onErrorResumeNext(resumeNext)
+        return if (resumeNext != null) function.invoke(source, coords).onErrorResumeNext(resumeNext)
             else function.call(source)
     }
 
