@@ -5,7 +5,6 @@ import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import androidx.core.content.ContextCompat
-import androidx.fragment.app.Fragment
 import androidx.recyclerview.widget.DividerItemDecoration
 import androidx.recyclerview.widget.RecyclerView
 import com.squareup.picasso.Picasso
@@ -19,20 +18,18 @@ import java.util.*
 import kotlin.math.roundToInt
 
 
-interface ForecastListView {
-    var callback: Callback
+interface ForecastListView : BasicView<ForecastListView.Presenter>  {
     fun setData(forecastItems: List<ForecastItem>)
-    fun setInProgress(inProgress: Boolean)
 
-    interface Callback {
+    interface Presenter : BasicView.Presenter {
         fun onRefreshRequested()
     }
 }
 
 
-class ForecastListFragment : Fragment(R.layout.fragment_forecast_list), ForecastListView {
-
-    override lateinit var callback: ForecastListView.Callback
+class ForecastListFragmentView
+    : AbstractBasicViewFragment<ForecastListView.Presenter>(R.layout.fragment_forecast_list),
+    ForecastListView {
 
     private lateinit var adapter: ForecastAdapter
 
@@ -43,7 +40,7 @@ class ForecastListFragment : Fragment(R.layout.fragment_forecast_list), Forecast
         ContextCompat.getDrawable(view.context, R.drawable.list_separator)?.let {
             itemDecorator.setDrawable(it)
         }
-        swipe_to_refresh.setOnRefreshListener { callback.onRefreshRequested() }
+        swipe_to_refresh.setOnRefreshListener { presenter.onRefreshRequested() }
     }
 
     override fun setData(forecastItems: List<ForecastItem>) {
@@ -146,6 +143,6 @@ class ForecastListFragment : Fragment(R.layout.fragment_forecast_list), Forecast
 
 
     companion object {
-        fun newInstance() = ForecastListFragment()
+        fun newInstance() = ForecastListFragmentView()
     }
 }

@@ -7,12 +7,15 @@ import androidx.fragment.app.Fragment
 import androidx.fragment.app.FragmentManager
 import androidx.fragment.app.FragmentStatePagerAdapter
 import io.github.websters_dog.weather_forecast_2.location.LocationRepository
-import io.github.websters_dog.weather_forecast_2.view.CurrentWeatherFragment
-import io.github.websters_dog.weather_forecast_2.view.ForecastListFragment
+import io.github.websters_dog.weather_forecast_2.view.CurrentWeatherFragmentView
+import io.github.websters_dog.weather_forecast_2.view.ForecastListFragmentView
 import io.github.websters_dog.weather_forecast_2.weather.WeatherRepository
 import kotlinx.android.synthetic.main.activity_main.*
 
 class MainActivity : AppCompatActivity() {
+
+    private lateinit var currentWeatherPresenter: CurrentWeatherPresenter
+    private lateinit var forecastListPresenter: ForecastListPresenter
 
 
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -24,10 +27,10 @@ class MainActivity : AppCompatActivity() {
 
         val pageAdapter = WeatherPagesAdapter(this, supportFragmentManager)
 
-        val currentWeatherFragment = CurrentWeatherFragment.newInstance()
+        val currentWeatherFragment = CurrentWeatherFragmentView.newInstance()
         pageAdapter.addFragment(currentWeatherFragment)
 
-        val forecastListFragment = ForecastListFragment.newInstance()
+        val forecastListFragment = ForecastListFragmentView.newInstance()
         pageAdapter.addFragment(forecastListFragment)
 
         view_pager.adapter = pageAdapter
@@ -43,8 +46,13 @@ class MainActivity : AppCompatActivity() {
         val locationRepository = LocationRepository.getInstance(applicationContext)
         val weatherRepository = WeatherRepository.getInstance()
 
-        val currentWeatherPresenter = CurrentWeatherPresenter(
+        currentWeatherPresenter = CurrentWeatherPresenter(
             currentWeatherFragment,
+            locationRepository,
+            weatherRepository)
+
+        forecastListPresenter = ForecastListPresenter(
+            forecastListFragment,
             locationRepository,
             weatherRepository)
     }
